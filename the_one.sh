@@ -32,6 +32,8 @@ echo -e \"\n------------- $nom -------------\n\" >>\$logfile
 unison -batch save_steam_$nom >>\$logfile"
 }
 
+echo "============= $(date) ==============" >> $log
+
 
 # PART 1 - Creation de fichier .prf
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,31 +49,29 @@ do
 	then
 		echo ""$nom".prf est deja existant" >> $log
 	else
-		test_steam=0
-		while IFS= read verif_save_steam || test_steam=0
-		do
-			if [ "$verif_save_steam" = "#Sauvegarde de $nom" ] 
-			then
-				echo "La sauvegarde est déjà présente dans le script save_steam.sh" >> $log
-			else
-				ajout_script >> $Save_Steam
-				cp "$locPRF"base_prf "$locPRF""$nom".prf
-		        	sed -i -e s/\$nom/$nom/g "$locPRF""$nom".prf
-		        	if [ -e $Syno/$nom ]
-				then
-					echo "Le repertoire $nom est deja existant sur le Synology" >> $log
-				else
-			        	mkdir $Syno/$nom
-			        	echo "$nom a été créé sur le Syno" >> $log
-					notify-send "SAUVEGARDE STEAM" \
-				            "La sauvegarde $nom a été créée sur le Syno" \
-					    -i $notif_icon/Warning.svg \
-					    -t 10000
-				fi
-			test_steam=1
-			fi
-		done < $Save_Steam
+		cp "$locPRF"base_prf "$locPRF""$nom".prf
+		sed -i -e s/\$nom/$nom/g "$locPRF""$nom".prf
 	fi
+
+	count=$(grep "#Sauvegarde de $nom" $Save_Steam | wc -l)	
+	if [ "$count" -gt "0" ] 
+	then
+		echo "La sauvegarde est déjà présente dans le script save_steam.sh" >> $log
+	else
+		ajout_script >> $Save_Steam
+		if [ -e $Syno/$nom ]
+		then
+			echo "Le repertoire $nom est deja existant sur le Synology" >> $log
+		else
+			echo "create dir $Syno $nom"
+			mkdir $Syno/$nom
+			echo "$nom a été créé sur le Syno" >> $log
+			notify-send "SAUVEGARDE STEAM" \
+			    "La sauvegarde $nom a été créée sur le Syno" \
+			    -i $notif_icon/Warning.svg \
+			    -t 10000
+	fi
+fi
 done < $liste
 
 
