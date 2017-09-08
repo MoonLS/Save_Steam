@@ -71,6 +71,19 @@ do
 			    -i $notif_icon/Warning.svg \
 			    -t 10000
 	fi
+	
+	if [ -d $Syno/$nom ]
+	then
+		echo "Le repertoire $nom est deja existant sur le Synology" >> $log
+	else
+		echo "create dir $Syno $nom"
+		mkdir $Syno/$nom
+		echo "$nom a été créé sur le Syno" >> $log
+		notify-send "SAUVEGARDE STEAM" \
+		"La sauvegarde $nom a été créée sur le Syno" \
+		-i $notif_icon/Warning.svg \
+		-t 10000
+	fi
 fi
 done < $liste
 
